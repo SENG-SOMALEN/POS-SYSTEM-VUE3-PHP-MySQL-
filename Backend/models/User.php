@@ -129,4 +129,21 @@ class User {
 
         return $stmt->execute([':id' => $id]);
     }
+
+    /*
+    =======================
+    | Find BY Email
+    =======================
+    */
+    public function findByEmail($email){
+        $sqlQuery = "SELECT * FROM users WHERE email = :email LIMIT 1";
+
+        $stmt = $this->conn->prepare($sqlQuery);
+
+        $stmt->execute([
+            ':email' => $email
+        ]);
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
