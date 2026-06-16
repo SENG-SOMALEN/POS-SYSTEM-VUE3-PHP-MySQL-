@@ -110,7 +110,7 @@ class UserController {
         }
 
         // Validate required fields
-        if (empty($data['username']) || empty($data['password   '])) {
+        if (empty($data['username']) || empty($data['password'])) {
             http_response_code(400);
 
             echo json_encode([
