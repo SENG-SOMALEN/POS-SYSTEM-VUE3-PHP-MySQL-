@@ -16,11 +16,11 @@ class AuthController {
             session_start();
         }
 
+        // Read data from Frontend and convert JSON into Array
         $data = json_decode(
             file_get_contents('php://input'),
             true
         );
-
         if (!is_array($data)) {
             http_response_code(400);
 
@@ -32,9 +32,9 @@ class AuthController {
             return;
         }
 
+        // Capture value from data
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
-        
         if (empty($email) || empty($password)) {
             http_response_code(400);
 
@@ -46,17 +46,16 @@ class AuthController {
             return;
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Invalid email format'
-            ]);
-            return;
-        }
+        // if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        //     http_response_code(400);
+        //     echo json_encode([
+        //         'success' => false,
+        //         'message' => 'Invalid email format'
+        //     ]);
+        //     return;
+        // }
 
         $user = $this->userModel->findByEmail($email);
-
         if (!$user) {
             http_response_code(404);
             echo json_encode([
@@ -90,6 +89,47 @@ class AuthController {
                 'email' => $user['email'],
                 'username'  => $user['username'] ?? null,
             ]
+        ]);
+    }
+
+    public function logout(){
+        session_start();
+
+        session_unset();
+        session_destroy();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Logout successful!'
+        ]);
+    }
+
+    public function register(){
+        // Read data from frontend and convert JSON into Array 
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        $existingUser = $this->userModel->findByEmail($data['email']);
+        if ($existingUser) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Email already exists'
+            ]);
+
+            return;
+        }
+
+        // convert password simple into hash_password 
+        $data['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        $data['role'] = 'Cashier';
+
+        $result = $this->userModel->create($data);
+
+        echo json_encode([
+            'success' => $result,
+            'message' => $result ? 'Register successful' : 'Register failed'
         ]);
     }
 }

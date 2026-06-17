@@ -3,7 +3,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../controller/UserController.php';
-require_once __DIR__ . '/../auth/authController.php'; // ធានាថាឈ្មោះ folder 'auth' ត្រូវនឹងក្នុងកុំព្យូទ័រ
+require_once __DIR__ . '/../auth/authController.php'; 
 
 $userController = new UserController();
 
@@ -64,6 +64,38 @@ switch ($method) {
                 exit;
             }
         }
+
+        if ($route === '/logout' || $route === '/auth') {
+            try {
+                $auth = new AuthController();
+                $auth->logout();
+                exit;
+            } catch (Throwable $error) {
+                http_response_code(500);
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Internal server error'
+                ]);
+                exit;
+            }
+        }
+
+        if ($route === '/register' || $route === '/auth') {
+            try {
+                $auth = new AuthController();
+                $auth->register();
+                exit;
+            } catch (Throwable $error) {
+                http_response_code(500);
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Internal server error'
+                ]);
+                exit;
+            }
+        }
         break;
 
     case 'PUT':
@@ -93,7 +125,6 @@ switch ($method) {
         break;
 }
 
-// ករណីរកមិនឃើញ Route ណាដែលត្រូវទាល់តែសោះ (404 Not Found)
 http_response_code(404);
 echo json_encode([
     'success' => false,
