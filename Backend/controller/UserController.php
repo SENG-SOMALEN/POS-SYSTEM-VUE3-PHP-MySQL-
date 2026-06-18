@@ -38,7 +38,7 @@ class UserController {
     */
     public function show($id){
         if (!is_numeric($id) || $id <= 0) {
-            http_response_code(4000);
+            http_response_code(400);
 
             echo json_encode([
                 'success' => false,
