@@ -1,20 +1,34 @@
 <?php
+session_start();
 
 header('Content-Type: application/json');
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+require_once __DIR__ . '/../core/Route.php';
 
-$basePath = '/MINI_POS_SYSTEM/Backend/public';
+$route = Router::getRoute();
 
-$route = str_replace($basePath, '', $uri);
+if (str_starts_with($route, '/auth')) {
 
-require_once __DIR__ . '/../routes/user.php';
-require_once __DIR__ . '/../routes/product.php';
-require_once __DIR__ . '/../routes/auth.php';
+    require_once __DIR__ . '/../routes/auth.php';
 
-http_response_code(404);
+} elseif (str_starts_with($route, '/user')) {
 
-echo json_encode([
-    'success' => false,
-    'message' => 'Route not found'
-]);
+    require_once __DIR__ . '/../routes/user.php';
+
+} elseif (str_starts_with($route, '/product')) {
+
+    require_once __DIR__ . '/../routes/product.php';
+
+} elseif (str_starts_with($route, '/cart')) {
+
+    require_once __DIR__ . '/../routes/cart.php';
+
+} else {
+
+    http_response_code(404);
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'Route not found'
+    ]);
+}
