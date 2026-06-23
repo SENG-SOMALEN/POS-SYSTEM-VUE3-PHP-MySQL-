@@ -135,6 +135,8 @@ class ProductController {
                 'success' => false,
                 'message' => 'Invalid update data'
             ]);
+
+            return;
         }
 
         $result = $this->product->updateProduct($id, $putData);

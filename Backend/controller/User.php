@@ -110,12 +110,17 @@ class UserController {
         }
 
         // Validate required fields
-        if (empty($data['username']) || empty($data['password'])) {
+        $required = ['username', 'full_name', 'email', 'password'];
+        foreach ($required as $field) {
+            if (!empty($data[$field])) {
+                continue;
+            }
+
             http_response_code(400);
 
             echo json_encode([
                 'success' => false,
-                'message' => 'Username and password are required'
+                'message' => "$field is required"
             ]);
 
             return;
@@ -123,6 +128,7 @@ class UserController {
 
         // Hash password and remove plain-text password from data
         $data['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        $data['role'] = $data['role'] ?? 'Cashier';
         unset($data['password']);
 
         $result = $this->userModel->create($data);
@@ -172,6 +178,8 @@ class UserController {
                 'success' => false,
                 'message' => 'Invalid JSON input'
             ]);
+
+            return;
         }
 
         if (!empty($data['password'])) {

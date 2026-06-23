@@ -93,7 +93,9 @@ class AuthController {
     }
 
     public function logout(){
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         session_unset();
         session_destroy();
@@ -111,6 +113,31 @@ class AuthController {
             true
         );
 
+        if (!is_array($data)) {
+            http_response_code(400);
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid JSON body'
+            ]);
+
+            return;
+        }
+
+        $required = ['username', 'full_name', 'email', 'password'];
+        foreach ($required as $field) {
+            if (empty($data[$field])) {
+                http_response_code(400);
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => "$field is required"
+                ]);
+
+                return;
+            }
+        }
+
         $existingUser = $this->userModel->findByEmail($data['email']);
         if ($existingUser) {
             echo json_encode([
@@ -123,7 +150,7 @@ class AuthController {
 
         // convert password simple into hash_password 
         $data['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        $data['role'] = 'Cashier';
+        $data['role'] = $data['role'] ?? 'Cashier';
 
         $result = $this->userModel->create($data);
 
